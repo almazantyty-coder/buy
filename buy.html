@@ -200,7 +200,7 @@
     .credit-text-red { color: #dc2626; font-weight: 700; font-size: 0.95rem; }
     .credit-text-normal { color: #64748b; font-weight: 700; font-size: 0.95rem; }
 
-    /* VIRTUAL MOBILE CONTROLS OVERLAY (Hidden by default, shown in Mobile Mode) */
+    /* VIRTUAL MOBILE CONTROLS OVERLAY */
     .mobile-controls-overlay {
       position: absolute;
       bottom: 10px;
@@ -269,7 +269,18 @@
       touch-action: manipulation;
     }
 
-    .action-btn:active { background: rgba(220, 38, 38, 0.9); }
+    .action-btn:active, .action-btn.active-hold { background: rgba(220, 38, 38, 0.9); }
+
+    /* Touch look helper overlay for frontier container */
+    .touch-look-zone {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      display: none;
+      z-index: 10;
+    }
+    body.mobile-mode .touch-look-zone {
+      display: block;
+    }
 
     /* MOBILE MODE LAYOUT STYLING */
     body.mobile-mode {
@@ -338,6 +349,9 @@
 
     <div class="game-container" id="frontierGameBox">
       <iframe id="frontierFrame" src=""></iframe>
+      
+      <!-- Touch-drag look zone for Frontier -->
+      <div class="touch-look-zone" id="touchLookZone"></div>
 
       <!-- Frontier Virtual Controls Overlay for Mobile Mode -->
       <div class="mobile-controls-overlay" id="frontierControls">
@@ -349,7 +363,7 @@
         </div>
         <div class="virtual-actions">
           <div class="action-btn" ontouchstart="simKey('Space', true)" ontouchend="simKey('Space', false)">SHOOT</div>
-          <div class="action-btn" ontouchstart="simMouse('right', true)" ontouchend="simMouse('right', false)">ZOOM</div>
+          <div class="action-btn" id="zoomBtn" ontouchstart="toggleZoom(true)" ontouchend="toggleZoom(false)">ZOOM</div>
         </div>
       </div>
     </div>
@@ -393,6 +407,9 @@
 
   <script>
     let activeGameType = '';
+    let isZoomed = false;
+    let lastTouchX = 0;
+    let lastTouchY = 0;
 
     function openGame(gameId) {
       document.getElementById('homeView').classList.remove('active');
@@ -405,7 +422,7 @@
       } else if (gameId === 'robotPongs') {
         activeGameType = 'pongs';
         document.getElementById('robotPongsView').classList.add('active');
-        bulletproofLoad('pongsFrame', "https://almazantyty-coder.github.io/games/Robot%20Pongs.html");
+        bulletproofLoad('pongsName' in window ? '' : 'pongsFrame', "https://almazantyty-coder.github.io/games/Robot%20Pongs.html");
       }
     }
 
@@ -431,7 +448,32 @@
       }
     }
 
-    // Simulate Keyboard events inside the game iframe
+    // Touch look setup for looking around in Frontier
+    const lookZone = document.getElementById('touchLookZone');
+    lookZone.addEventListener('touchstart', (e) => {
+      if (e.touches.length > 0) {
+        lastTouchX = e.touches[0].clientX;
+        lastTouchY = e.touches[0].clientY;
+      }
+    }, {passive: true});
+
+    lookZone.addEventListener('touchmove', (e) => {
+      if (e.touches.length > 0 && activeGameType === 'frontier') {
+        const currentX = e.touches[0].clientX;
+        const currentY = e.touches[0].clientY;
+        const deltaX = currentX - lastTouchX;
+        const deltaY = currentY - lastTouchY;
+        lastTouchX = currentX;
+        lastTouchY = currentY;
+
+        // Send mouse movement to iframe if possible via postMessage, or trigger generic movement
+        const frame = document.getElementById('frontierFrame');
+        try {
+          frame.contentWindow.postMessage({ type: 'mouseMove', dx: deltaX, dy: deltaY }, '*');
+        } catch(err) {}
+      }
+    }, {passive: true});
+
     function simKey(codeName, isDown) {
       const frame = document.getElementById('frontierFrame');
       try {
@@ -443,15 +485,22 @@
       } catch(e) {}
     }
 
-    // Simulate Mouse clicks/zoom for Frontier
-    function simMouse(action, isDown) {
+    function toggleZoom(isDown) {
+      isZoomed = isDown;
+      const zoomBtn = document.getElementById('zoomBtn');
       const frame = document.getElementById('frontierFrame');
+      
       try {
         const doc = frame.contentDocument || frame.contentWindow.document;
         const evtType = isDown ? 'mousedown' : 'mouseup';
-        const buttonVal = action === 'right' ? 2 : 0;
-        const evt = new MouseEvent(evtType, { bubbles: true, cancelable: true, button: buttonVal });
+        const evt = new MouseEvent(evtType, { bubbles: true, cancelable: true, button: 2 });
         doc.dispatchEvent(evt);
+        
+        if (isDown) {
+          zoomBtn.classList.add('active-hold');
+        } else {
+          zoomBtn.classList.remove('active-hold');
+        }
       } catch(e) {}
     }
 
