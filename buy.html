@@ -281,7 +281,7 @@
     <div class="nav-bar">
       <button class="back-btn" onclick="showHome()">← Back to Games</button>
       <div class="nav-controls">
-        <select class="version-select" onchange="changeFrontierVersion(this.value)">
+        <select id="frontierSelect" class="version-select" onchange="changeFrontierVersion(this.value)">
           <option value="https://almazantyty-coder.github.io/games/Frontier%20.html">Latest Version</option>
           <option value="https://almazantyty-coder.github.io/games/FrontieOLD.html">V1</option>
         </select>
@@ -299,7 +299,7 @@
         <button class="back-btn" onclick="exitFullScreen()" style="padding: 4px 10px; font-size: 0.85rem;">Exit Fullscreen</button>
       </div>
       
-      <iframe id="frontierFrame" src="https://almazantyty-coder.github.io/games/Frontier%20.html" allow="fullscreen"></iframe>
+      <iframe id="frontierFrame" src=""></iframe>
     </div>
 
     <div class="description-card">
@@ -332,7 +332,7 @@
         <button class="back-btn" onclick="exitFullScreen()" style="padding: 4px 10px; font-size: 0.85rem;">Exit Fullscreen</button>
       </div>
       
-      <iframe src="https://almazantyty-coder.github.io/games/Robot%20Pongs.html" allow="fullscreen"></iframe>
+      <iframe id="pongsFrame" src=""></iframe>
     </div>
 
     <div class="description-card">
@@ -347,21 +347,58 @@
   <script>
     function openGame(gameId) {
       document.getElementById('homeView').classList.remove('active');
+      
       if (gameId === 'frontier') {
         document.getElementById('frontierView').classList.add('active');
+        const selectElem = document.getElementById('frontierSelect');
+        bulletproofLoad('frontierFrame', selectElem.value);
       } else if (gameId === 'robotPongs') {
         document.getElementById('robotPongsView').classList.add('active');
+        bulletproofLoad('pongsFrame', "https://almazantyty-coder.github.io/games/Robot%20Pongs.html");
       }
     }
 
     function showHome() {
+      // Completely wipe out sources so games stop running in the background and free resources
+      document.getElementById('frontierFrame').src = "";
+      document.getElementById('pongsFrame').src = "";
+
       document.getElementById('frontierView').classList.remove('active');
       document.getElementById('robotPongsView').classList.remove('active');
       document.getElementById('homeView').classList.add('active');
     }
 
     function changeFrontierVersion(url) {
-      document.getElementById('frontierFrame').src = url;
+      bulletproofLoad('frontierFrame', url);
+    }
+
+    // Bulletproof loader designed to force browser rendering engine and canvas to wake up
+    function bulletproofLoad(frameId, url) {
+      const frame = document.getElementById(frameId);
+      
+      // Step 1: Blank it out and force a layout reflow
+      frame.style.display = 'none';
+      frame.src = 'about:blank';
+
+      // Step 2: Assign real URL after a micro-delay
+      setTimeout(() => {
+        frame.src = url;
+        frame.style.display = 'block';
+
+        // Step 3: Double-tap reload safety net at 400ms to guarantee canvas graphics context boots properly
+        setTimeout(() => {
+          try {
+            if (frame.contentWindow) {
+              frame.contentWindow.location.reload();
+            }
+          } catch(e) {
+            // Cross-origin fallback safety reset
+            frame.src = '';
+            setTimeout(() => { frame.src = url; }, 50);
+          }
+        }, 400);
+
+      }, 50);
     }
 
     function toggleFullScreen(boxId) {
