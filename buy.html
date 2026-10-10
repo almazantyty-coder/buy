@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>The Buying Studios Launcher</title>
   <style>
     * {
@@ -339,6 +339,184 @@
     body.pongs-mobile-mode .nav-controls {
       justify-content: space-between;
     }
+
+    /* ===== General mobile polish ===== */
+    * { -webkit-tap-highlight-color: transparent; }
+    .game-button:active { transform: scale(0.98); border-color: #3b82f6; }
+
+    @media (hover: none) {
+      .game-button:hover { transform: none; border-color: #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    }
+
+    @media (max-width: 640px) {
+      body { padding: 1rem; padding-left: max(1rem, env(safe-area-inset-left)); padding-right: max(1rem, env(safe-area-inset-right)); }
+      header { margin-bottom: 1.2rem; padding-bottom: 0.8rem; }
+      h1 { font-size: 1.5rem; }
+      .bs-logo-badge { font-size: 1rem; padding: 5px 10px; }
+      .mobile-toggle-container { width: 100%; justify-content: space-between; }
+      .game-grid { grid-template-columns: 1fr; gap: 0.9rem; }
+      .game-button { padding: 1.2rem; }
+      .nav-bar { flex-direction: column; align-items: stretch; gap: 0.6rem; margin-bottom: 1rem; }
+      .nav-controls { justify-content: space-between; }
+      .nav-controls .version-select { flex: 1; min-width: 0; }
+      .back-btn, .fullscreen-btn, .version-select { padding: 0.8rem 1rem; }
+      .game-container { height: 60vh; height: 60dvh; min-height: 300px; border-radius: 12px; }
+      .description-card { padding: 1.1rem; }
+    }
+
+    /* ===== Frontier touch mode ===== */
+    .touch-launch-card {
+      display: none;
+      position: absolute; inset: 0;
+      flex-direction: column; align-items: center; justify-content: center;
+      gap: 14px; padding: 20px; text-align: center;
+      background: radial-gradient(ellipse at 50% 0%, #1e3a5f 0%, #0f172a 70%);
+      color: #e2e8f0; z-index: 5;
+    }
+    .touch-launch-card h3 { font-size: 1.5rem; color: #fff; }
+    .touch-launch-card p { font-size: 0.92rem; color: #94a3b8; max-width: 320px; line-height: 1.45; }
+    .touch-launch-card .keys-row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+    .touch-launch-card .keys-row span {
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 8px; padding: 4px 10px; font-size: 0.8rem; font-weight: 700; color: #cbd5e1;
+    }
+    .play-touch-btn {
+      background: #3b82f6; color: #fff; border: none; border-radius: 14px;
+      padding: 0.95rem 2rem; font-size: 1.1rem; font-weight: 800; cursor: pointer;
+      box-shadow: 0 6px 20px rgba(59,130,246,0.45);
+    }
+    .play-touch-btn:active { transform: scale(0.97); background: #2563eb; }
+    .fallback-note { color: #fbbf24 !important; font-weight: 700; }
+
+    #frontierGameBox.touch-launch .touch-launch-card { display: flex; }
+    #frontierGameBox.touch-launch iframe { display: none !important; }
+    #frontierGameBox.touch-launch { height: 340px; }
+
+    #frontierGameBox.touch-playing {
+      position: fixed; inset: 0; z-index: 1000;
+      width: 100vw; height: 100vh; height: 100dvh;
+      border: none; border-radius: 0; margin: 0;
+    }
+    #frontierGameBox.touch-playing .fullscreen-header { display: none; }
+    body.touch-playing-body { overflow: hidden; overscroll-behavior: none; position: fixed; width: 100%; }
+
+    .touch-loading {
+      display: none; position: absolute; inset: 0; z-index: 8;
+      align-items: center; justify-content: center;
+      background: #0f172a; color: #94a3b8; font-weight: 700; pointer-events: none;
+    }
+    #frontierGameBox.is-loading .touch-loading { display: flex; }
+
+    .touch-ui {
+      display: none; position: absolute; inset: 0; z-index: 30;
+      touch-action: none; -webkit-user-select: none; user-select: none;
+      -webkit-touch-callout: none;
+      --pad: clamp(120px, 42vh, 178px);
+      --big: clamp(76px, 24vh, 104px);
+      --edge: 22px;
+      --gap: 4px;
+    }
+    #frontierGameBox.touch-playing .touch-ui { display: block; }
+    .touch-ui * { -webkit-user-select: none; user-select: none; touch-action: none; }
+
+    #dragZone { position: absolute; inset: 0; }
+
+    .tbtn {
+      position: absolute;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(15,23,42,0.45);
+      border: 2px solid rgba(255,255,255,0.28);
+      color: rgba(255,255,255,0.92);
+      font-weight: 800; border-radius: 50%;
+      backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+      transition: background 0.08s, transform 0.08s, border-color 0.08s;
+    }
+    .tbtn.on { background: rgba(59,130,246,0.7); border-color: #93c5fd; transform: scale(0.94); }
+
+    #dpad {
+      position: absolute;
+      left: calc(env(safe-area-inset-left, 0px) + var(--edge));
+      bottom: calc(env(safe-area-inset-bottom, 0px) + var(--edge));
+      width: var(--pad); height: var(--pad);
+      display: grid; grid-template: repeat(3, 1fr) / repeat(3, 1fr); gap: var(--gap);
+    }
+    #dpad .dp {
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(15,23,42,0.45); border: 2px solid rgba(255,255,255,0.25);
+      color: rgba(255,255,255,0.9); font-size: calc(var(--pad) * 0.14);
+      border-radius: 14px; transition: background 0.08s;
+    }
+    #dpad .dp.on { background: rgba(59,130,246,0.7); border-color: #93c5fd; }
+    #dpad .dp.up { grid-area: 1 / 2; border-radius: 18px 18px 8px 8px; }
+    #dpad .dp.left { grid-area: 2 / 1; border-radius: 18px 8px 8px 18px; }
+    #dpad .dp.right { grid-area: 2 / 3; border-radius: 8px 18px 18px 8px; }
+    #dpad .dp.down { grid-area: 3 / 2; border-radius: 8px 8px 18px 18px; }
+    #dpad .dp.mid { grid-area: 2 / 2; border-radius: 50%; background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.12); }
+
+    #shootBtn {
+      width: var(--big); height: var(--big); font-size: calc(var(--big) * 0.17);
+      right: calc(env(safe-area-inset-right, 0px) + var(--edge));
+      bottom: calc(env(safe-area-inset-bottom, 0px) + var(--edge));
+      background: rgba(220,38,38,0.5); border-color: rgba(254,202,202,0.7);
+    }
+    #shootBtn.on { background: rgba(239,68,68,0.9); border-color: #fecaca; }
+    #aimBtn {
+      width: calc(var(--big) * 0.82); height: calc(var(--big) * 0.82); font-size: calc(var(--big) * 0.15);
+      right: calc(env(safe-area-inset-right, 0px) + var(--edge) + var(--big) * 0.09);
+      bottom: calc(env(safe-area-inset-bottom, 0px) + var(--edge) + var(--big) + 14px);
+    }
+    #extraKeys {
+      position: absolute;
+      top: calc(env(safe-area-inset-top, 0px) + 12px);
+      right: calc(env(safe-area-inset-right, 0px) + var(--edge));
+      display: grid; grid-template-columns: repeat(2, 46px); gap: 8px;
+      direction: rtl;
+    }
+    .xbtn {
+      position: static;
+      width: 46px; height: 46px; font-size: 0.95rem;
+    }
+
+    .topbtn {
+      width: 44px; height: 44px; font-size: 1.1rem;
+      top: calc(env(safe-area-inset-top, 0px) + 12px);
+      background: rgba(15,23,42,0.55);
+    }
+    #exitTouch { left: calc(env(safe-area-inset-left, 0px) + 14px); }
+    #settingsBtn { left: calc(env(safe-area-inset-left, 0px) + 66px); }
+    #fsTouch { left: calc(env(safe-area-inset-left, 0px) + 118px); }
+
+    #touchSettings {
+      display: none; position: absolute;
+      top: calc(env(safe-area-inset-top, 0px) + 64px);
+      left: calc(env(safe-area-inset-left, 0px) + 14px);
+      width: min(300px, calc(100vw - 28px));
+      background: rgba(15,23,42,0.94); color: #e2e8f0;
+      border: 1px solid rgba(255,255,255,0.15); border-radius: 14px;
+      padding: 14px; z-index: 40; font-size: 0.9rem; font-weight: 700;
+      max-height: calc(100dvh - 80px); overflow-y: auto;
+    }
+    #touchSettings.open { display: block; }
+    #touchSettings label { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+    #touchSettings label:last-child { margin-bottom: 0; }
+    #touchSettings .row { display: flex; justify-content: space-between; }
+    #touchSettings input[type=range] { width: 100%; touch-action: pan-x; accent-color: #3b82f6; }
+    #touchSettings select {
+      background: #1e293b; color: #e2e8f0; border: 1px solid #475569;
+      border-radius: 8px; padding: 8px; font-size: 0.9rem; font-weight: 700;
+    }
+
+    .rotate-hint {
+      display: none; position: absolute; inset: 0; z-index: 50;
+      background: rgba(15,23,42,0.92); color: #e2e8f0;
+      flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+      text-align: center; padding: 24px; font-weight: 700;
+    }
+    .rotate-hint .ico { font-size: 2.6rem; }
+    .rotate-hint small { color: #94a3b8; font-weight: 600; }
+    @media (orientation: portrait) {
+      #frontierGameBox.touch-playing:not(.hint-dismissed) .rotate-hint { display: flex; }
+    }
   </style>
 </head>
 <body>
@@ -351,9 +529,9 @@
     
     <!-- Mobile Mode Toggle Switch (Only appears when Robot Pongs is open) -->
     <div class="mobile-toggle-container" id="pongsToggleContainer">
-      <span>Mobile Optimization</span>
+      <span id="toggleLabel">Mobile Optimization</span>
       <label class="switch">
-        <input type="checkbox" id="mobileModeToggle" onchange="togglePongsMobileMode(this.checked)">
+        <input type="checkbox" id="mobileModeToggle" onchange="handleMobileToggle(this.checked)">
         <span class="slider"></span>
       </label>
     </div>
@@ -405,7 +583,73 @@
         <button class="back-btn" onclick="exitFullScreen()" style="padding: 4px 10px; font-size: 0.85rem;">Exit Fullscreen</button>
       </div>
       
-      <iframe id="frontierFrame" src=""></iframe>
+      <iframe id="frontierFrame" src="" allow="fullscreen; pointer-lock; autoplay; gamepad"></iframe>
+
+      <div class="touch-loading" id="frontierLoading">Loading Frontier…</div>
+
+      <div class="touch-launch-card" id="touchLaunchCard">
+        <h3>Frontier · Touch Mode</h3>
+        <p>On-screen controls for phones and tablets. Landscape works best.</p>
+        <div class="keys-row">
+          <span>D-pad = WASD</span><span>Drag = look</span><span>Fire = Space</span><span>E R F B Shift</span><span>Aim = Right-click</span>
+        </div>
+        <button class="play-touch-btn" onclick="startFrontierTouch()">▶ Play with touch controls</button>
+        <p class="fallback-note" id="touchFallbackNote" style="display:none"></p>
+      </div>
+
+      <div class="touch-ui" id="touchUI">
+        <div id="dragZone"></div>
+
+        <div id="dpad">
+          <div class="dp up" data-dir="w">▲</div>
+          <div class="dp left" data-dir="a">◀</div>
+          <div class="dp mid"></div>
+          <div class="dp right" data-dir="d">▶</div>
+          <div class="dp down" data-dir="s">▼</div>
+        </div>
+
+        <div class="tbtn" id="aimBtn">AIM</div>
+        <div class="tbtn" id="shootBtn" data-key="space">FIRE</div>
+
+        <div id="extraKeys">
+          <div class="tbtn xbtn" data-key="e">E</div>
+          <div class="tbtn xbtn" data-key="r">R</div>
+          <div class="tbtn xbtn" data-key="f">F</div>
+          <div class="tbtn xbtn" data-key="b">B</div>
+          <div class="tbtn xbtn" data-key="shift">⇧</div>
+        </div>
+
+        <div class="tbtn topbtn" id="exitTouch">✕</div>
+        <div class="tbtn topbtn" id="settingsBtn">⚙</div>
+        <div class="tbtn topbtn" id="fsTouch">⛶</div>
+
+        <div id="touchSettings">
+          <label>
+            <span class="row"><span>Look sensitivity</span><span id="sensVal">1.4</span></span>
+            <input type="range" id="sensRange" min="0.4" max="4" step="0.1" value="1.4">
+          </label>
+          <label>
+            <span>Aim button</span>
+            <select id="aimModeSel">
+              <option value="hold">Hold to aim</option>
+              <option value="toggle">Tap to toggle aim</option>
+            </select>
+          </label>
+          <label>
+            <span>Game version</span>
+            <select id="touchVersionSel" onchange="changeFrontierVersion(this.value)">
+              <option value="https://almazantyty-coder.github.io/games/Frontier%20.html">Latest Version</option>
+              <option value="https://almazantyty-coder.github.io/games/FrontieOLD.html">V1</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="rotate-hint" id="rotateHint" onclick="document.getElementById('frontierGameBox').classList.add('hint-dismissed')">
+          <div class="ico">⟲</div>
+          <div>Rotate your phone sideways</div>
+          <small>Tap to play in portrait anyway</small>
+        </div>
+      </div>
     </div>
 
     <div class="description-card">
@@ -480,16 +724,35 @@
   </section>
 
   <script>
+    let currentGame = null;
+    let frontierTouchMode = false;
+    try {
+      const saved = localStorage.getItem('bs_frontier_touch');
+      frontierTouchMode = saved !== null ? saved === '1' : (window.matchMedia && matchMedia('(pointer: coarse)').matches);
+    } catch (e) {
+      frontierTouchMode = window.matchMedia && matchMedia('(pointer: coarse)').matches;
+    }
+
     function openGame(gameId) {
       document.getElementById('homeView').classList.remove('active');
       
+      currentGame = gameId;
       if (gameId === 'frontier') {
         document.getElementById('frontierView').classList.add('active');
-        const selectElem = document.getElementById('frontierSelect');
-        bulletproofLoad('frontierFrame', selectElem.value);
+        document.getElementById('pongsToggleContainer').classList.add('active-toggle');
+        document.getElementById('toggleLabel').textContent = 'Touch Controls';
+        document.getElementById('mobileModeToggle').checked = frontierTouchMode;
+        if (frontierTouchMode) {
+          enterFrontierLaunchState();
+        } else {
+          const selectElem = document.getElementById('frontierSelect');
+          bulletproofLoad('frontierFrame', selectElem.value);
+        }
       } else if (gameId === 'robotPongs') {
         document.getElementById('robotPongsView').classList.add('active');
         document.getElementById('pongsToggleContainer').classList.add('active-toggle');
+        document.getElementById('toggleLabel').textContent = 'Mobile Optimization';
+        document.getElementById('mobileModeToggle').checked = false;
         bulletproofLoad('pongsFrame', "https://almazantyty-coder.github.io/games/Robot%20Pongs.html");
       } else if (gameId === 'allCar') {
         document.getElementById('allCarView').classList.add('active');
@@ -498,6 +761,9 @@
     }
 
     function showHome() {
+      stopFrontierTouch();
+      document.getElementById('frontierGameBox').classList.remove('touch-launch');
+      currentGame = null;
       // Completely wipe out sources so games stop running in the background and free resources
       document.getElementById('frontierFrame').src = "";
       document.getElementById('pongsFrame').src = "";
@@ -515,7 +781,22 @@
     }
 
     function changeFrontierVersion(url) {
-      bulletproofLoad('frontierFrame', url);
+      document.getElementById('frontierSelect').value = url;
+      document.getElementById('touchVersionSel').value = url;
+      const box = document.getElementById('frontierGameBox');
+      if (box.classList.contains('touch-playing')) {
+        loadFrontierTouch(url);
+      } else if (!box.classList.contains('touch-launch')) {
+        bulletproofLoad('frontierFrame', url);
+      }
+    }
+
+    function handleMobileToggle(checked) {
+      if (currentGame === 'frontier') {
+        setFrontierTouchMode(checked);
+      } else {
+        togglePongsMobileMode(checked);
+      }
     }
 
     function togglePongsMobileMode(isEnabled) {
@@ -575,6 +856,357 @@
         document.msExitFullscreen();
       }
     }
+
+    /* =====================================================
+       FRONTIER TOUCH MODE
+       The game is fetched and written into the iframe so it
+       shares this page's origin. That is what lets the on-screen
+       controls send real keyboard / mouse events into the game.
+       ===================================================== */
+
+    function frontierShim() {
+      // Runs INSIDE the game before its own scripts. Fakes pointer lock for touch screens.
+      var lockEl = null;
+      function fire() { document.dispatchEvent(new Event('pointerlockchange')); }
+      Element.prototype.requestPointerLock = function () { lockEl = this; setTimeout(fire, 0); return Promise.resolve(); };
+      Document.prototype.exitPointerLock = function () { lockEl = null; setTimeout(fire, 0); };
+      try {
+        Object.defineProperty(Document.prototype, 'pointerLockElement', { get: function () { return lockEl; }, configurable: true });
+      } catch (e) {}
+      window.__bsLock = function () { return lockEl; };
+    }
+
+    const KEYDEFS = {
+      w:     { key: 'w', code: 'KeyW', kc: 87 },
+      a:     { key: 'a', code: 'KeyA', kc: 65 },
+      s:     { key: 's', code: 'KeyS', kc: 83 },
+      d:     { key: 'd', code: 'KeyD', kc: 68 },
+      space: { key: ' ', code: 'Space', kc: 32 },
+      e:     { key: 'e', code: 'KeyE', kc: 69 },
+      f:     { key: 'f', code: 'KeyF', kc: 70 },
+      b:     { key: 'b', code: 'KeyB', kc: 66 },
+      r:     { key: 'r', code: 'KeyR', kc: 82 },
+      shift: { key: 'Shift', code: 'ShiftLeft', kc: 16 }
+    };
+
+    const touchState = {
+      held: new Set(),
+      aiming: false,
+      sens: 1.4,
+      aimMode: 'hold',
+      playing: false
+    };
+    try {
+      const s = parseFloat(localStorage.getItem('bs_touch_sens'));
+      if (s) touchState.sens = s;
+      const m = localStorage.getItem('bs_touch_aim');
+      if (m) touchState.aimMode = m;
+    } catch (e) {}
+
+    function gameWin() {
+      const f = document.getElementById('frontierFrame');
+      try { return f.contentWindow && f.contentWindow.document ? f.contentWindow : null; } catch (e) { return null; }
+    }
+    function gameTarget(win) {
+      const doc = win.document;
+      const lock = win.__bsLock && win.__bsLock();
+      return lock || doc.querySelector('canvas') || doc.body;
+    }
+
+    function sendKey(name, down) {
+      const win = gameWin(); if (!win) return;
+      const def = KEYDEFS[name]; if (!def) return;
+      const doc = win.document;
+      const ev = new win.KeyboardEvent(down ? 'keydown' : 'keyup', {
+        key: def.key, code: def.code, bubbles: true, cancelable: true, view: win,
+        shiftKey: name === 'shift' || touchState.held.has('shift')
+      });
+      try {
+        Object.defineProperty(ev, 'keyCode', { get: () => def.kc });
+        Object.defineProperty(ev, 'which', { get: () => def.kc });
+      } catch (e) {}
+      (doc.activeElement || doc.body).dispatchEvent(ev);
+    }
+    function keyDown(name) { if (touchState.held.has(name)) return; touchState.held.add(name); sendKey(name, true); }
+    function keyUp(name) { if (!touchState.held.has(name)) return; touchState.held.delete(name); sendKey(name, false); }
+
+    function sendMouse(type, opts) {
+      const win = gameWin(); if (!win) return;
+      const target = opts.target || gameTarget(win);
+      const init = Object.assign({ bubbles: true, cancelable: true, view: win }, opts.init || {});
+      target.dispatchEvent(new win.MouseEvent(type, init));
+    }
+    function sendPointer(type, init) {
+      const win = gameWin(); if (!win || !win.PointerEvent) return;
+      const target = gameTarget(win);
+      try {
+        target.dispatchEvent(new win.PointerEvent(type, Object.assign({ bubbles: true, cancelable: true, pointerType: 'mouse', isPrimary: true, view: win }, init)));
+      } catch (e) {}
+    }
+
+    function setAim(on) {
+      if (touchState.aiming === on) return;
+      touchState.aiming = on;
+      document.getElementById('aimBtn').classList.toggle('on', on);
+      const win = gameWin(); if (!win) return;
+      const f = document.getElementById('frontierFrame').getBoundingClientRect();
+      const cx = f.width / 2, cy = f.height / 2;
+      if (on) {
+        sendPointer('pointerdown', { button: 2, buttons: 2, clientX: cx, clientY: cy });
+        sendMouse('mousedown', { init: { button: 2, buttons: 2, clientX: cx, clientY: cy } });
+      } else {
+        sendPointer('pointerup', { button: 2, buttons: 0, clientX: cx, clientY: cy });
+        sendMouse('mouseup', { init: { button: 2, buttons: 0, clientX: cx, clientY: cy } });
+      }
+    }
+
+    function releaseAll() {
+      Array.from(touchState.held).forEach(keyUp);
+      setAim(false);
+      document.querySelectorAll('#touchUI .on').forEach(el => el.classList.remove('on'));
+    }
+
+    // ----- camera drag + tap-to-click -----
+    let camDX = 0, camDY = 0, camRaf = 0;
+    function flushCamera() {
+      camRaf = 0;
+      if (!camDX && !camDY) return;
+      const win = gameWin(); if (!win) { camDX = camDY = 0; return; }
+      const f = document.getElementById('frontierFrame').getBoundingClientRect();
+      sendMouse('mousemove', { init: {
+        movementX: camDX * touchState.sens, movementY: camDY * touchState.sens,
+        clientX: f.width / 2, clientY: f.height / 2
+      }});
+      camDX = camDY = 0;
+    }
+    function queueCamera(dx, dy) {
+      camDX += dx; camDY += dy;
+      if (!camRaf) camRaf = requestAnimationFrame(flushCamera);
+    }
+
+    function tapClick(x, y) {
+      // Only click through when the game is NOT pointer-locked (menus, "click to play" screens).
+      const win = gameWin(); if (!win) return;
+      if (win.__bsLock && win.__bsLock()) return;
+      const f = document.getElementById('frontierFrame').getBoundingClientRect();
+      const cx = x - f.left, cy = y - f.top;
+      const target = win.document.elementFromPoint(cx, cy) || win.document.body;
+      const base = { clientX: cx, clientY: cy, screenX: x, screenY: y, button: 0 };
+      sendMouse('mousemove', { target, init: base });
+      sendPointer('pointerdown', Object.assign({ buttons: 1 }, base));
+      sendMouse('mousedown', { target, init: Object.assign({ buttons: 1 }, base) });
+      sendPointer('pointerup', Object.assign({ buttons: 0 }, base));
+      sendMouse('mouseup', { target, init: Object.assign({ buttons: 0 }, base) });
+      sendMouse('click', { target, init: Object.assign({ buttons: 0 }, base) });
+    }
+
+    function bindTouchControls() {
+      const $ = id => document.getElementById(id);
+
+      // Look zone
+      const dz = $('dragZone');
+      let dragId = null, lx = 0, ly = 0, sx = 0, sy = 0, st = 0, moved = 0;
+      dz.addEventListener('pointerdown', e => {
+        if (dragId !== null) return;
+        dragId = e.pointerId; dz.setPointerCapture(e.pointerId);
+        lx = sx = e.clientX; ly = sy = e.clientY; st = performance.now(); moved = 0;
+        $('touchSettings').classList.remove('open');
+        e.preventDefault();
+      });
+      dz.addEventListener('pointermove', e => {
+        if (e.pointerId !== dragId) return;
+        const dx = e.clientX - lx, dy = e.clientY - ly;
+        lx = e.clientX; ly = e.clientY; moved += Math.abs(dx) + Math.abs(dy);
+        queueCamera(dx, dy);
+        e.preventDefault();
+      });
+      const endDrag = e => {
+        if (e.pointerId !== dragId) return;
+        dragId = null;
+        if (e.type === 'pointerup' && moved < 12 && performance.now() - st < 300) tapClick(sx, sy);
+      };
+      dz.addEventListener('pointerup', endDrag);
+      dz.addEventListener('pointercancel', endDrag);
+
+      // D-pad (slide across it, diagonals supported)
+      const pad = $('dpad');
+      let padId = null;
+      const dirEls = {};
+      pad.querySelectorAll('[data-dir]').forEach(el => dirEls[el.dataset.dir] = el);
+      function padUpdate(e) {
+        const r = pad.getBoundingClientRect();
+        const dx = e.clientX - (r.left + r.width / 2);
+        const dy = e.clientY - (r.top + r.height / 2);
+        const t = r.width * 0.17;
+        const want = { w: dy < -t, s: dy > t, a: dx < -t, d: dx > t };
+        for (const k in want) {
+          if (want[k]) keyDown(k); else keyUp(k);
+          dirEls[k].classList.toggle('on', want[k]);
+        }
+      }
+      function padEnd(e) {
+        if (e.pointerId !== padId) return;
+        padId = null;
+        ['w', 'a', 's', 'd'].forEach(k => { keyUp(k); dirEls[k].classList.remove('on'); });
+      }
+      pad.addEventListener('pointerdown', e => {
+        if (padId !== null) return;
+        padId = e.pointerId; pad.setPointerCapture(e.pointerId); padUpdate(e); e.preventDefault();
+      });
+      pad.addEventListener('pointermove', e => { if (e.pointerId === padId) { padUpdate(e); e.preventDefault(); } });
+      pad.addEventListener('pointerup', padEnd);
+      pad.addEventListener('pointercancel', padEnd);
+
+      // Hold buttons (fire = Space, E, R, Shift)
+      document.querySelectorAll('#touchUI [data-key]').forEach(el => {
+        let id = null;
+        el.addEventListener('pointerdown', e => {
+          if (id !== null) return;
+          id = e.pointerId; el.setPointerCapture(e.pointerId);
+          el.classList.add('on'); keyDown(el.dataset.key); e.preventDefault();
+        });
+        const up = e => {
+          if (e.pointerId !== id) return;
+          id = null; el.classList.remove('on'); keyUp(el.dataset.key);
+        };
+        el.addEventListener('pointerup', up);
+        el.addEventListener('pointercancel', up);
+      });
+
+      // Aim (right-click)
+      const aim = $('aimBtn');
+      let aimId = null;
+      aim.addEventListener('pointerdown', e => {
+        if (aimId !== null) return;
+        aimId = e.pointerId; aim.setPointerCapture(e.pointerId); e.preventDefault();
+        if (touchState.aimMode === 'toggle') setAim(!touchState.aiming); else setAim(true);
+      });
+      const aimUp = e => {
+        if (e.pointerId !== aimId) return;
+        aimId = null;
+        if (touchState.aimMode === 'hold') setAim(false);
+      };
+      aim.addEventListener('pointerup', aimUp);
+      aim.addEventListener('pointercancel', aimUp);
+
+      // Top buttons
+      const tap = (id, fn) => $(id).addEventListener('pointerup', e => { e.preventDefault(); fn(); });
+      tap('exitTouch', stopFrontierTouch);
+      tap('settingsBtn', () => $('touchSettings').classList.toggle('open'));
+      tap('fsTouch', () => toggleFullScreen('frontierGameBox'));
+
+      // Settings
+      const sens = $('sensRange');
+      sens.value = touchState.sens; $('sensVal').textContent = touchState.sens.toFixed(1);
+      sens.addEventListener('input', () => {
+        touchState.sens = parseFloat(sens.value);
+        $('sensVal').textContent = touchState.sens.toFixed(1);
+        try { localStorage.setItem('bs_touch_sens', touchState.sens); } catch (e) {}
+      });
+      const aimSel = $('aimModeSel');
+      aimSel.value = touchState.aimMode;
+      aimSel.addEventListener('change', () => {
+        setAim(false);
+        touchState.aimMode = aimSel.value;
+        try { localStorage.setItem('bs_touch_aim', touchState.aimMode); } catch (e) {}
+      });
+
+      // Block context menu / selection / pinch inside the game box
+      $('frontierGameBox').addEventListener('contextmenu', e => e.preventDefault());
+    }
+    bindTouchControls();
+
+    // ----- loading + state -----
+    async function loadFrontierTouch(url) {
+      const box = document.getElementById('frontierGameBox');
+      const frame = document.getElementById('frontierFrame');
+      const note = document.getElementById('touchFallbackNote');
+      releaseAll();
+      box.classList.add('is-loading');
+      frame.style.display = 'block';
+      try {
+        const res = await fetch(url, { mode: 'cors' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        let html = await res.text();
+        const inject = '<base href="' + url + '"><script>(' + frontierShim.toString() + ')();<\/script>';
+        if (/<head[^>]*>/i.test(html)) html = html.replace(/<head[^>]*>/i, m => m + inject);
+        else if (/<html[^>]*>/i.test(html)) html = html.replace(/<html[^>]*>/i, m => m + inject);
+        else html = inject + html;
+        frame.removeAttribute('src');
+        frame.srcdoc = html;
+        frame.onload = () => box.classList.remove('is-loading');
+        setTimeout(() => box.classList.remove('is-loading'), 6000);
+      } catch (err) {
+        // Fallback: normal load. The game still runs, but touch controls can't reach into it.
+        frame.removeAttribute('srcdoc');
+        frame.src = url;
+        box.classList.remove('is-loading');
+        note.style.display = 'block';
+        note.textContent = 'Could not hook the controls into the game, so the buttons may not work. (' + err.message + ')';
+      }
+    }
+
+    function enterFrontierLaunchState() {
+      const box = document.getElementById('frontierGameBox');
+      stopFrontierTouch(true);
+      document.getElementById('frontierFrame').src = 'about:blank';
+      box.classList.add('touch-launch');
+    }
+
+    function startFrontierTouch() {
+      const box = document.getElementById('frontierGameBox');
+      box.classList.remove('touch-launch');
+      box.classList.add('touch-playing');
+      if (window.matchMedia && matchMedia('(orientation: landscape)').matches) box.classList.add('hint-dismissed');
+      else box.classList.remove('hint-dismissed');
+      document.body.classList.add('touch-playing-body');
+      touchState.playing = true;
+      // Try for real fullscreen + landscape (works on Android; iPhone ignores it, the fixed layout still fills the screen)
+      try {
+        const p = box.requestFullscreen ? box.requestFullscreen() : (box.webkitRequestFullscreen && box.webkitRequestFullscreen());
+        if (p && p.then) p.then(lockLandscape).catch(() => {});
+      } catch (e) {}
+      document.getElementById('touchFallbackNote').style.display = 'none';
+      loadFrontierTouch(document.getElementById('frontierSelect').value);
+    }
+    function lockLandscape() {
+      try { screen.orientation && screen.orientation.lock && screen.orientation.lock('landscape').catch(() => {}); } catch (e) {}
+    }
+
+    function stopFrontierTouch(keepLaunch) {
+      const box = document.getElementById('frontierGameBox');
+      const wasPlaying = box.classList.contains('touch-playing');
+      releaseAll();
+      touchState.playing = false;
+      box.classList.remove('touch-playing', 'is-loading');
+      document.body.classList.remove('touch-playing-body');
+      document.getElementById('touchSettings').classList.remove('open');
+      if (wasPlaying) {
+        const f = document.getElementById('frontierFrame');
+        f.removeAttribute('srcdoc');
+        f.src = 'about:blank';
+        try { if (document.fullscreenElement) exitFullScreen(); } catch (e) {}
+        try { screen.orientation && screen.orientation.unlock && screen.orientation.unlock(); } catch (e) {}
+        if (!keepLaunch && currentGame === 'frontier' && frontierTouchMode) box.classList.add('touch-launch');
+      }
+    }
+
+    function setFrontierTouchMode(on) {
+      frontierTouchMode = on;
+      try { localStorage.setItem('bs_frontier_touch', on ? '1' : '0'); } catch (e) {}
+      const box = document.getElementById('frontierGameBox');
+      if (on) {
+        enterFrontierLaunchState();
+      } else {
+        stopFrontierTouch(true);
+        box.classList.remove('touch-launch');
+        bulletproofLoad('frontierFrame', document.getElementById('frontierSelect').value);
+      }
+    }
+
+    // Safety: never leave keys stuck
+    document.addEventListener('visibilitychange', () => { if (document.hidden) releaseAll(); });
+    window.addEventListener('blur', releaseAll);
   </script>
 </body>
 </html>
