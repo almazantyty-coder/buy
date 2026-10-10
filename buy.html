@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>The Buying Studios Launcher</title>
   <style>
     * {
@@ -10,8 +10,6 @@
       margin: 0;
       padding: 0;
       font-family: 'Fredoka', 'Quicksand', 'Segoe UI', sans-serif;
-      user-select: none;
-      -webkit-user-select: none;
     }
 
     body {
@@ -48,6 +46,7 @@
       border-radius: 8px;
       letter-spacing: 1px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      user-select: none;
     }
 
     h1 {
@@ -56,8 +55,9 @@
       font-weight: 800;
     }
 
+    /* Mobile Mode Toggle (Only visible for Robot Pongs) */
     .mobile-toggle-container {
-      display: flex;
+      display: none;
       align-items: center;
       gap: 8px;
       background: #e2e8f0;
@@ -66,6 +66,10 @@
       font-weight: 700;
       font-size: 0.9rem;
       color: #334155;
+    }
+
+    .mobile-toggle-container.active-toggle {
+      display: flex;
     }
 
     .switch {
@@ -99,8 +103,13 @@
     input:checked + .slider { background-color: #3b82f6; }
     input:checked + .slider:before { transform: translateX(20px); }
 
-    .view-section { display: none; }
-    .view-section.active { display: block; }
+    .view-section {
+      display: none;
+    }
+
+    .view-section.active {
+      display: block;
+    }
 
     .game-grid {
       display: grid;
@@ -125,8 +134,16 @@
       box-shadow: 0 8px 20px rgba(59, 130, 246, 0.15);
     }
 
-    .game-button h3 { font-size: 1.4rem; color: #0f172a; margin-bottom: 0.5rem; }
-    .game-button p { color: #64748b; font-size: 0.9rem; }
+    .game-button h3 {
+      font-size: 1.4rem;
+      color: #0f172a;
+      margin-bottom: 0.5rem;
+    }
+
+    .game-button p {
+      color: #64748b;
+      font-size: 0.9rem;
+    }
 
     .nav-bar {
       display: flex;
@@ -154,26 +171,54 @@
       font-size: 0.95rem;
     }
 
-    .back-btn:hover, .fullscreen-btn:hover { background: #cbd5e1; }
-    .fullscreen-btn { background: #3b82f6; color: #ffffff; }
-    .fullscreen-btn:hover { background: #2563eb; }
-    .version-select { border: 2px solid #cbd5e1; outline: none; }
+    .back-btn:hover, .fullscreen-btn:hover {
+      background: #cbd5e1;
+    }
+
+    .fullscreen-btn {
+      background: #3b82f6;
+      color: #ffffff;
+    }
+
+    .fullscreen-btn:hover {
+      background: #2563eb;
+    }
+
+    .version-select {
+      border: 2px solid #cbd5e1;
+      outline: none;
+    }
 
     .warning-banner {
-      background: #fef3c7; border: 2px solid #f59e0b; color: #92400e;
-      padding: 0.8rem 1.2rem; border-radius: 12px; font-weight: 700;
-      text-align: center; margin-bottom: 1rem; font-size: 0.95rem;
+      background: #fef3c7;
+      border: 2px solid #f59e0b;
+      color: #92400e;
+      padding: 0.8rem 1.2rem;
+      border-radius: 12px;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 1rem;
+      font-size: 0.95rem;
     }
 
     .good-banner {
-      background: #dcfce7; border: 2px solid #22c55e; color: #15803d;
-      padding: 0.8rem 1.2rem; border-radius: 12px; font-weight: 700;
-      text-align: center; margin-bottom: 1rem; font-size: 0.95rem;
+      background: #dcfce7;
+      border: 2px solid #22c55e;
+      color: #15803d;
+      padding: 0.8rem 1.2rem;
+      border-radius: 12px;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 1rem;
+      font-size: 0.95rem;
     }
 
     .red-recommendation {
-      color: #dc2626; font-weight: 700; text-align: center;
-      margin-bottom: 1.5rem; font-size: 0.95rem;
+      color: #dc2626;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 1.5rem;
+      font-size: 0.95rem;
     }
 
     .game-container {
@@ -190,112 +235,110 @@
       flex-direction: column;
     }
 
-    iframe { width: 100%; height: 100%; flex: 1; border: none; }
-
-    .description-card {
-      background: #ffffff; border: 2px solid #e2e8f0; border-radius: 16px; padding: 1.5rem;
-    }
-    .description-card h4 { font-size: 1.1rem; color: #334155; margin-bottom: 0.5rem; text-transform: uppercase; }
-    .description-card p { font-size: 1rem; color: #475569; line-height: 1.5; margin-bottom: 0.8rem; }
-    .credit-text-red { color: #dc2626; font-weight: 700; font-size: 0.95rem; }
-    .credit-text-normal { color: #64748b; font-weight: 700; font-size: 0.95rem; }
-
-    /* VIRTUAL MOBILE CONTROLS OVERLAY */
-    .mobile-controls-overlay {
-      position: absolute;
-      bottom: 10px;
-      left: 10px;
-      right: 10px;
-      height: 160px;
-      pointer-events: none;
+    .fullscreen-header {
       display: none;
-      z-index: 20;
+      background: rgba(15, 23, 42, 0.95);
+      padding: 0.6rem 1.2rem;
+      align-items: center;
       justify-content: space-between;
-      align-items: flex-end;
-    }
-
-    body.mobile-mode .mobile-controls-overlay {
-      display: flex;
-    }
-
-    .virtual-dpad {
-      display: grid;
-      grid-template-columns: 50px 50px 50px;
-      grid-template-rows: 50px 50px;
-      gap: 4px;
-      pointer-events: auto;
-    }
-
-    .dpad-btn {
-      background: rgba(30, 41, 59, 0.75);
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      color: white;
-      font-weight: bold;
-      border-radius: 10px;
-      font-size: 1.1rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      touch-action: manipulation;
-    }
-
-    .dpad-btn:active { background: rgba(59, 130, 246, 0.9); }
-    .dpad-up { grid-column: 2; grid-row: 1; }
-    .dpad-left { grid-column: 1; grid-row: 2; }
-    .dpad-down { grid-column: 2; grid-row: 2; }
-    .dpad-right { grid-column: 3; grid-row: 2; }
-
-    .virtual-actions {
-      display: flex;
-      gap: 10px;
-      pointer-events: auto;
-    }
-
-    .action-btn {
-      width: 65px;
-      height: 65px;
-      background: rgba(30, 41, 59, 0.8);
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      color: white;
-      font-weight: 700;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.85rem;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-      cursor: pointer;
-      touch-action: manipulation;
-    }
-
-    .action-btn:active, .action-btn.active-hold { background: rgba(220, 38, 38, 0.9); }
-
-    /* Touch look helper overlay for frontier container */
-    .touch-look-zone {
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      display: none;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       z-index: 10;
     }
-    body.mobile-mode .touch-look-zone {
-      display: block;
+
+    .game-container:fullscreen {
+      width: 100vw;
+      height: 100vh;
+      border-radius: 0;
+      border: none;
     }
 
-    /* MOBILE MODE LAYOUT STYLING */
-    body.mobile-mode {
+    .game-container:fullscreen .fullscreen-header {
+      display: flex;
+    }
+
+    .game-container:-webkit-full-screen {
+      width: 100vw;
+      height: 100vh;
+      border-radius: 0;
+      border: none;
+    }
+
+    .game-container:-webkit-full-screen .fullscreen-header {
+      display: flex;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      flex: 1;
+      border: none;
+    }
+
+    .description-card {
+      background: #ffffff;
+      border: 2px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 1.5rem;
+    }
+
+    .description-card h4 {
+      font-size: 1.1rem;
+      color: #334155;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .description-card p {
+      font-size: 1rem;
+      color: #475569;
+      line-height: 1.5;
+      margin-bottom: 0.8rem;
+    }
+
+    .credit-text-red {
+      color: #dc2626;
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    .credit-text-normal {
+      color: #64748b;
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    /* Pongs Mobile Mode Styling */
+    body.pongs-mobile-mode {
       padding: 0.75rem;
       max-width: 480px;
       margin: 0 auto;
     }
-    body.mobile-mode header { flex-direction: column; align-items: stretch; gap: 10px; }
-    body.mobile-mode h1 { font-size: 1.6rem; text-align: center; }
-    body.mobile-mode .header-left { justify-content: center; }
-    body.mobile-mode .mobile-toggle-container { justify-content: center; }
-    body.mobile-mode .game-grid { grid-template-columns: 1fr; }
-    body.mobile-mode .game-container { height: 420px; }
-    body.mobile-mode .nav-bar { flex-direction: column; align-items: stretch; }
-    body.mobile-mode .nav-controls { justify-content: space-between; }
+    body.pongs-mobile-mode header {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 10px;
+    }
+    body.pongs-mobile-mode h1 {
+      font-size: 1.6rem;
+      text-align: center;
+    }
+    body.pongs-mobile-mode .header-left {
+      justify-content: center;
+    }
+    body.pongs-mobile-mode .mobile-toggle-container {
+      justify-content: center;
+    }
+    body.pongs-mobile-mode .game-container {
+      height: 400px;
+    }
+    body.pongs-mobile-mode .nav-bar {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    body.pongs-mobile-mode .nav-controls {
+      justify-content: space-between;
+    }
   </style>
 </head>
 <body>
@@ -306,10 +349,11 @@
       <h1>The Buying Studios</h1>
     </div>
     
-    <div class="mobile-toggle-container">
-      <span>Mobile Mode</span>
+    <!-- Mobile Mode Toggle Switch (Only appears when Robot Pongs is open) -->
+    <div class="mobile-toggle-container" id="pongsToggleContainer">
+      <span>Mobile Optimization</span>
       <label class="switch">
-        <input type="checkbox" id="mobileModeToggle" onchange="toggleMobileMode(this.checked)">
+        <input type="checkbox" id="mobileModeToggle" onchange="togglePongsMobileMode(this.checked)">
         <span class="slider"></span>
       </label>
     </div>
@@ -318,14 +362,22 @@
   <!-- LAUNCHER HOME SCREEN -->
   <section id="homeView" class="view-section active">
     <div class="game-grid">
+      <!-- Frontier Button -->
       <div class="game-button" onclick="openGame('frontier')">
         <h3>Frontier</h3>
         <p>Open World Western</p>
       </div>
       
+      <!-- Robot Pongs Button -->
       <div class="game-button" onclick="openGame('robotPongs')">
         <h3>Robot Pongs</h3>
         <p>Robotic Arcade Ping-Pong</p>
+      </div>
+
+      <!-- All Car Button -->
+      <div class="game-button" onclick="openGame('allCar')">
+        <h3>All Car</h3>
+        <p>Shapeshift Rush</p>
       </div>
     </div>
   </section>
@@ -348,24 +400,12 @@
     </div>
 
     <div class="game-container" id="frontierGameBox">
-      <iframe id="frontierFrame" src=""></iframe>
-      
-      <!-- Touch-drag look zone for Frontier -->
-      <div class="touch-look-zone" id="touchLookZone"></div>
-
-      <!-- Frontier Virtual Controls Overlay for Mobile Mode -->
-      <div class="mobile-controls-overlay" id="frontierControls">
-        <div class="virtual-dpad">
-          <div class="dpad-btn dpad-up" ontouchstart="simKey('KeyW', true)" ontouchend="simKey('KeyW', false)">W</div>
-          <div class="dpad-btn dpad-left" ontouchstart="simKey('KeyA', true)" ontouchend="simKey('KeyA', false)">A</div>
-          <div class="dpad-btn dpad-down" ontouchstart="simKey('KeyS', true)" ontouchend="simKey('KeyS', false)">S</div>
-          <div class="dpad-btn dpad-right" ontouchstart="simKey('KeyD', true)" ontouchend="simKey('KeyD', false)">D</div>
-        </div>
-        <div class="virtual-actions">
-          <div class="action-btn" ontouchstart="simKey('Space', true)" ontouchend="simKey('Space', false)">SHOOT</div>
-          <div class="action-btn" id="zoomBtn" ontouchstart="toggleZoom(true)" ontouchend="toggleZoom(false)">ZOOM</div>
-        </div>
+      <div class="fullscreen-header">
+        <div class="bs-logo-badge">BS</div>
+        <button class="back-btn" onclick="exitFullScreen()" style="padding: 4px 10px; font-size: 0.85rem;">Exit Fullscreen</button>
       </div>
+      
+      <iframe id="frontierFrame" src=""></iframe>
     </div>
 
     <div class="description-card">
@@ -393,6 +433,11 @@
     </div>
 
     <div class="game-container" id="pongsGameBox">
+      <div class="fullscreen-header">
+        <div class="bs-logo-badge">BS</div>
+        <button class="back-btn" onclick="exitFullScreen()" style="padding: 4px 10px; font-size: 0.85rem;">Exit Fullscreen</button>
+      </div>
+      
       <iframe id="pongsFrame" src=""></iframe>
     </div>
 
@@ -405,34 +450,67 @@
     </div>
   </section>
 
-  <script>
-    let activeGameType = '';
-    let isZoomed = false;
-    let lastTouchX = 0;
-    let lastTouchY = 0;
+  <!-- ALL CAR GAME PAGE VIEW -->
+  <section id="allCarView" class="view-section">
+    <div class="nav-bar">
+      <button class="back-btn" onclick="showHome()">← Back to Games</button>
+      <button class="fullscreen-btn" onclick="toggleFullScreen('allCarGameBox')">⛶ Fullscreen</button>
+    </div>
 
+    <div class="good-banner">
+      Game should be able to run pretty well on your device.
+    </div>
+
+    <div class="game-container" id="allCarGameBox">
+      <div class="fullscreen-header">
+        <div class="bs-logo-badge">BS</div>
+        <button class="back-btn" onclick="exitFullScreen()" style="padding: 4px 10px; font-size: 0.85rem;">Exit Fullscreen</button>
+      </div>
+      
+      <iframe id="allCarFrame" src=""></iframe>
+    </div>
+
+    <div class="description-card">
+      <h4>Description</h4>
+      <p>Bring out your fast reaction times and quick thinking for this next game! Drive around, shape-shift into different types of vehicles, including boat or hydro boat, sports car, monster truck, sky jet, and snow racer. Use A/D to steer, keys 1 through 5 to morph, and Spacebar for the next form.</p>
+      <p class="credit-text-normal">
+        Made by Buying Studios, coded by Buying Studios.
+      </p>
+    </div>
+  </section>
+
+  <script>
     function openGame(gameId) {
       document.getElementById('homeView').classList.remove('active');
       
       if (gameId === 'frontier') {
-        activeGameType = 'frontier';
         document.getElementById('frontierView').classList.add('active');
         const selectElem = document.getElementById('frontierSelect');
         bulletproofLoad('frontierFrame', selectElem.value);
       } else if (gameId === 'robotPongs') {
-        activeGameType = 'pongs';
         document.getElementById('robotPongsView').classList.add('active');
-        bulletproofLoad('pongsName' in window ? '' : 'pongsFrame', "https://almazantyty-coder.github.io/games/Robot%20Pongs.html");
+        document.getElementById('pongsToggleContainer').classList.add('active-toggle');
+        bulletproofLoad('pongsFrame', "https://almazantyty-coder.github.io/games/Robot%20Pongs.html");
+      } else if (gameId === 'allCar') {
+        document.getElementById('allCarView').classList.add('active');
+        bulletproofLoad('allCarFrame', "https://almazantyty-coder.github.io/games/ALL%20CAR_%20Shapeshift%20Rush.html");
       }
     }
 
     function showHome() {
-      activeGameType = '';
+      // Completely wipe out sources so games stop running in the background and free resources
       document.getElementById('frontierFrame').src = "";
       document.getElementById('pongsFrame').src = "";
+      document.getElementById('allCarFrame').src = "";
+
+      // Hide Pongs mobile toggle when leaving Robot Pongs
+      document.getElementById('pongsToggleContainer').classList.remove('active-toggle');
+      document.getElementById('mobileModeToggle').checked = false;
+      document.body.classList.remove('pongs-mobile-mode');
 
       document.getElementById('frontierView').classList.remove('active');
       document.getElementById('robotPongsView').classList.remove('active');
+      document.getElementById('allCarView').classList.remove('active');
       document.getElementById('homeView').classList.add('active');
     }
 
@@ -440,72 +518,18 @@
       bulletproofLoad('frontierFrame', url);
     }
 
-    function toggleMobileMode(isEnabled) {
+    function togglePongsMobileMode(isEnabled) {
       if (isEnabled) {
-        document.body.classList.add('mobile-mode');
+        document.body.classList.add('pongs-mobile-mode');
       } else {
-        document.body.classList.remove('mobile-mode');
+        document.body.classList.remove('pongs-mobile-mode');
       }
     }
 
-    // Touch look setup for looking around in Frontier
-    const lookZone = document.getElementById('touchLookZone');
-    lookZone.addEventListener('touchstart', (e) => {
-      if (e.touches.length > 0) {
-        lastTouchX = e.touches[0].clientX;
-        lastTouchY = e.touches[0].clientY;
-      }
-    }, {passive: true});
-
-    lookZone.addEventListener('touchmove', (e) => {
-      if (e.touches.length > 0 && activeGameType === 'frontier') {
-        const currentX = e.touches[0].clientX;
-        const currentY = e.touches[0].clientY;
-        const deltaX = currentX - lastTouchX;
-        const deltaY = currentY - lastTouchY;
-        lastTouchX = currentX;
-        lastTouchY = currentY;
-
-        // Send mouse movement to iframe if possible via postMessage, or trigger generic movement
-        const frame = document.getElementById('frontierFrame');
-        try {
-          frame.contentWindow.postMessage({ type: 'mouseMove', dx: deltaX, dy: deltaY }, '*');
-        } catch(err) {}
-      }
-    }, {passive: true});
-
-    function simKey(codeName, isDown) {
-      const frame = document.getElementById('frontierFrame');
-      try {
-        const doc = frame.contentDocument || frame.contentWindow.document;
-        const eventType = isDown ? 'keydown' : 'keyup';
-        const evt = new KeyboardEvent(eventType, { code: codeName, bubbles: true, cancelable: true });
-        doc.dispatchEvent(evt);
-        frame.contentWindow.dispatchEvent(evt);
-      } catch(e) {}
-    }
-
-    function toggleZoom(isDown) {
-      isZoomed = isDown;
-      const zoomBtn = document.getElementById('zoomBtn');
-      const frame = document.getElementById('frontierFrame');
-      
-      try {
-        const doc = frame.contentDocument || frame.contentWindow.document;
-        const evtType = isDown ? 'mousedown' : 'mouseup';
-        const evt = new MouseEvent(evtType, { bubbles: true, cancelable: true, button: 2 });
-        doc.dispatchEvent(evt);
-        
-        if (isDown) {
-          zoomBtn.classList.add('active-hold');
-        } else {
-          zoomBtn.classList.remove('active-hold');
-        }
-      } catch(e) {}
-    }
-
+    // Bulletproof loader designed to force browser rendering engine and canvas to wake up
     function bulletproofLoad(frameId, url) {
       const frame = document.getElementById(frameId);
+      
       frame.style.display = 'none';
       frame.src = 'about:blank';
 
