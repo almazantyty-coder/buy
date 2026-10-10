@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>The Buying Studios Launcher</title>
   <style>
     * {
@@ -10,6 +10,8 @@
       margin: 0;
       padding: 0;
       font-family: 'Fredoka', 'Quicksand', 'Segoe UI', sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
     }
 
     body {
@@ -17,15 +19,24 @@
       color: #2b3a4a;
       min-height: 100vh;
       padding: 2rem;
+      transition: all 0.3s ease;
     }
 
     header {
       display: flex;
       align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
       gap: 12px;
       margin-bottom: 2rem;
       padding-bottom: 1rem;
       border-bottom: 3px solid #e0e6ed;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
 
     .bs-logo-badge {
@@ -37,7 +48,6 @@
       border-radius: 8px;
       letter-spacing: 1px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-      user-select: none;
     }
 
     h1 {
@@ -46,13 +56,51 @@
       font-weight: 800;
     }
 
-    .view-section {
-      display: none;
+    .mobile-toggle-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #e2e8f0;
+      padding: 6px 12px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: #334155;
     }
 
-    .view-section.active {
-      display: block;
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
     }
+
+    .switch input { opacity: 0; width: 0; height: 0; }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #cbd5e1;
+      transition: .3s;
+      border-radius: 24px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px; width: 18px;
+      left: 3px; bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider { background-color: #3b82f6; }
+    input:checked + .slider:before { transform: translateX(20px); }
+
+    .view-section { display: none; }
+    .view-section.active { display: block; }
 
     .game-grid {
       display: grid;
@@ -77,16 +125,8 @@
       box-shadow: 0 8px 20px rgba(59, 130, 246, 0.15);
     }
 
-    .game-button h3 {
-      font-size: 1.4rem;
-      color: #0f172a;
-      margin-bottom: 0.5rem;
-    }
-
-    .game-button p {
-      color: #64748b;
-      font-size: 0.9rem;
-    }
+    .game-button h3 { font-size: 1.4rem; color: #0f172a; margin-bottom: 0.5rem; }
+    .game-button p { color: #64748b; font-size: 0.9rem; }
 
     .nav-bar {
       display: flex;
@@ -114,54 +154,26 @@
       font-size: 0.95rem;
     }
 
-    .back-btn:hover, .fullscreen-btn:hover {
-      background: #cbd5e1;
-    }
-
-    .fullscreen-btn {
-      background: #3b82f6;
-      color: #ffffff;
-    }
-
-    .fullscreen-btn:hover {
-      background: #2563eb;
-    }
-
-    .version-select {
-      border: 2px solid #cbd5e1;
-      outline: none;
-    }
+    .back-btn:hover, .fullscreen-btn:hover { background: #cbd5e1; }
+    .fullscreen-btn { background: #3b82f6; color: #ffffff; }
+    .fullscreen-btn:hover { background: #2563eb; }
+    .version-select { border: 2px solid #cbd5e1; outline: none; }
 
     .warning-banner {
-      background: #fef3c7;
-      border: 2px solid #f59e0b;
-      color: #92400e;
-      padding: 0.8rem 1.2rem;
-      border-radius: 12px;
-      font-weight: 700;
-      text-align: center;
-      margin-bottom: 1rem;
-      font-size: 0.95rem;
+      background: #fef3c7; border: 2px solid #f59e0b; color: #92400e;
+      padding: 0.8rem 1.2rem; border-radius: 12px; font-weight: 700;
+      text-align: center; margin-bottom: 1rem; font-size: 0.95rem;
     }
 
     .good-banner {
-      background: #dcfce7;
-      border: 2px solid #22c55e;
-      color: #15803d;
-      padding: 0.8rem 1.2rem;
-      border-radius: 12px;
-      font-weight: 700;
-      text-align: center;
-      margin-bottom: 1rem;
-      font-size: 0.95rem;
+      background: #dcfce7; border: 2px solid #22c55e; color: #15803d;
+      padding: 0.8rem 1.2rem; border-radius: 12px; font-weight: 700;
+      text-align: center; margin-bottom: 1rem; font-size: 0.95rem;
     }
 
     .red-recommendation {
-      color: #dc2626;
-      font-weight: 700;
-      text-align: center;
-      margin-bottom: 1.5rem;
-      font-size: 0.95rem;
+      color: #dc2626; font-weight: 700; text-align: center;
+      margin-bottom: 1.5rem; font-size: 0.95rem;
     }
 
     .game-container {
@@ -178,97 +190,128 @@
       flex-direction: column;
     }
 
-    .fullscreen-header {
-      display: none;
-      background: rgba(15, 23, 42, 0.95);
-      padding: 0.6rem 1.2rem;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      z-index: 10;
-    }
-
-    .game-container:fullscreen {
-      width: 100vw;
-      height: 100vh;
-      border-radius: 0;
-      border: none;
-    }
-
-    .game-container:fullscreen .fullscreen-header {
-      display: flex;
-    }
-
-    .game-container:-webkit-full-screen {
-      width: 100vw;
-      height: 100vh;
-      border-radius: 0;
-      border: none;
-    }
-
-    .game-container:-webkit-full-screen .fullscreen-header {
-      display: flex;
-    }
-
-    iframe {
-      width: 100%;
-      height: 100%;
-      flex: 1;
-      border: none;
-    }
+    iframe { width: 100%; height: 100%; flex: 1; border: none; }
 
     .description-card {
-      background: #ffffff;
-      border: 2px solid #e2e8f0;
-      border-radius: 16px;
-      padding: 1.5rem;
+      background: #ffffff; border: 2px solid #e2e8f0; border-radius: 16px; padding: 1.5rem;
+    }
+    .description-card h4 { font-size: 1.1rem; color: #334155; margin-bottom: 0.5rem; text-transform: uppercase; }
+    .description-card p { font-size: 1rem; color: #475569; line-height: 1.5; margin-bottom: 0.8rem; }
+    .credit-text-red { color: #dc2626; font-weight: 700; font-size: 0.95rem; }
+    .credit-text-normal { color: #64748b; font-weight: 700; font-size: 0.95rem; }
+
+    /* VIRTUAL MOBILE CONTROLS OVERLAY (Hidden by default, shown in Mobile Mode) */
+    .mobile-controls-overlay {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      right: 10px;
+      height: 160px;
+      pointer-events: none;
+      display: none;
+      z-index: 20;
+      justify-content: space-between;
+      align-items: flex-end;
     }
 
-    .description-card h4 {
+    body.mobile-mode .mobile-controls-overlay {
+      display: flex;
+    }
+
+    .virtual-dpad {
+      display: grid;
+      grid-template-columns: 50px 50px 50px;
+      grid-template-rows: 50px 50px;
+      gap: 4px;
+      pointer-events: auto;
+    }
+
+    .dpad-btn {
+      background: rgba(30, 41, 59, 0.75);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      color: white;
+      font-weight: bold;
+      border-radius: 10px;
       font-size: 1.1rem;
-      color: #334155;
-      margin-bottom: 0.5rem;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      touch-action: manipulation;
     }
 
-    .description-card p {
-      font-size: 1rem;
-      color: #475569;
-      line-height: 1.5;
-      margin-bottom: 0.8rem;
+    .dpad-btn:active { background: rgba(59, 130, 246, 0.9); }
+    .dpad-up { grid-column: 2; grid-row: 1; }
+    .dpad-left { grid-column: 1; grid-row: 2; }
+    .dpad-down { grid-column: 2; grid-row: 2; }
+    .dpad-right { grid-column: 3; grid-row: 2; }
+
+    .virtual-actions {
+      display: flex;
+      gap: 10px;
+      pointer-events: auto;
     }
 
-    .credit-text-red {
-      color: #dc2626;
+    .action-btn {
+      width: 65px;
+      height: 65px;
+      background: rgba(30, 41, 59, 0.8);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      color: white;
       font-weight: 700;
-      font-size: 0.95rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      cursor: pointer;
+      touch-action: manipulation;
     }
 
-    .credit-text-normal {
-      color: #64748b;
-      font-weight: 700;
-      font-size: 0.95rem;
+    .action-btn:active { background: rgba(220, 38, 38, 0.9); }
+
+    /* MOBILE MODE LAYOUT STYLING */
+    body.mobile-mode {
+      padding: 0.75rem;
+      max-width: 480px;
+      margin: 0 auto;
     }
+    body.mobile-mode header { flex-direction: column; align-items: stretch; gap: 10px; }
+    body.mobile-mode h1 { font-size: 1.6rem; text-align: center; }
+    body.mobile-mode .header-left { justify-content: center; }
+    body.mobile-mode .mobile-toggle-container { justify-content: center; }
+    body.mobile-mode .game-grid { grid-template-columns: 1fr; }
+    body.mobile-mode .game-container { height: 420px; }
+    body.mobile-mode .nav-bar { flex-direction: column; align-items: stretch; }
+    body.mobile-mode .nav-controls { justify-content: space-between; }
   </style>
 </head>
 <body>
 
   <header>
-    <div class="bs-logo-badge">BS</div>
-    <h1>The Buying Studios</h1>
+    <div class="header-left">
+      <div class="bs-logo-badge">BS</div>
+      <h1>The Buying Studios</h1>
+    </div>
+    
+    <div class="mobile-toggle-container">
+      <span>Mobile Mode</span>
+      <label class="switch">
+        <input type="checkbox" id="mobileModeToggle" onchange="toggleMobileMode(this.checked)">
+        <span class="slider"></span>
+      </label>
+    </div>
   </header>
 
   <!-- LAUNCHER HOME SCREEN -->
   <section id="homeView" class="view-section active">
     <div class="game-grid">
-      <!-- Frontier Button -->
       <div class="game-button" onclick="openGame('frontier')">
         <h3>Frontier</h3>
         <p>Open World Western</p>
       </div>
       
-      <!-- Robot Pongs Button -->
       <div class="game-button" onclick="openGame('robotPongs')">
         <h3>Robot Pongs</h3>
         <p>Robotic Arcade Ping-Pong</p>
@@ -294,12 +337,21 @@
     </div>
 
     <div class="game-container" id="frontierGameBox">
-      <div class="fullscreen-header">
-        <div class="bs-logo-badge">BS</div>
-        <button class="back-btn" onclick="exitFullScreen()" style="padding: 4px 10px; font-size: 0.85rem;">Exit Fullscreen</button>
-      </div>
-      
       <iframe id="frontierFrame" src=""></iframe>
+
+      <!-- Frontier Virtual Controls Overlay for Mobile Mode -->
+      <div class="mobile-controls-overlay" id="frontierControls">
+        <div class="virtual-dpad">
+          <div class="dpad-btn dpad-up" ontouchstart="simKey('KeyW', true)" ontouchend="simKey('KeyW', false)">W</div>
+          <div class="dpad-btn dpad-left" ontouchstart="simKey('KeyA', true)" ontouchend="simKey('KeyA', false)">A</div>
+          <div class="dpad-btn dpad-down" ontouchstart="simKey('KeyS', true)" ontouchend="simKey('KeyS', false)">S</div>
+          <div class="dpad-btn dpad-right" ontouchstart="simKey('KeyD', true)" ontouchend="simKey('KeyD', false)">D</div>
+        </div>
+        <div class="virtual-actions">
+          <div class="action-btn" ontouchstart="simKey('Space', true)" ontouchend="simKey('Space', false)">SHOOT</div>
+          <div class="action-btn" ontouchstart="simMouse('right', true)" ontouchend="simMouse('right', false)">ZOOM</div>
+        </div>
+      </div>
     </div>
 
     <div class="description-card">
@@ -327,11 +379,6 @@
     </div>
 
     <div class="game-container" id="pongsGameBox">
-      <div class="fullscreen-header">
-        <div class="bs-logo-badge">BS</div>
-        <button class="back-btn" onclick="exitFullScreen()" style="padding: 4px 10px; font-size: 0.85rem;">Exit Fullscreen</button>
-      </div>
-      
       <iframe id="pongsFrame" src=""></iframe>
     </div>
 
@@ -345,21 +392,25 @@
   </section>
 
   <script>
+    let activeGameType = '';
+
     function openGame(gameId) {
       document.getElementById('homeView').classList.remove('active');
       
       if (gameId === 'frontier') {
+        activeGameType = 'frontier';
         document.getElementById('frontierView').classList.add('active');
         const selectElem = document.getElementById('frontierSelect');
         bulletproofLoad('frontierFrame', selectElem.value);
       } else if (gameId === 'robotPongs') {
+        activeGameType = 'pongs';
         document.getElementById('robotPongsView').classList.add('active');
         bulletproofLoad('pongsFrame', "https://almazantyty-coder.github.io/games/Robot%20Pongs.html");
       }
     }
 
     function showHome() {
-      // Completely wipe out sources so games stop running in the background and free resources
+      activeGameType = '';
       document.getElementById('frontierFrame').src = "";
       document.getElementById('pongsFrame').src = "";
 
@@ -372,27 +423,53 @@
       bulletproofLoad('frontierFrame', url);
     }
 
-    // Bulletproof loader designed to force browser rendering engine and canvas to wake up
+    function toggleMobileMode(isEnabled) {
+      if (isEnabled) {
+        document.body.classList.add('mobile-mode');
+      } else {
+        document.body.classList.remove('mobile-mode');
+      }
+    }
+
+    // Simulate Keyboard events inside the game iframe
+    function simKey(codeName, isDown) {
+      const frame = document.getElementById('frontierFrame');
+      try {
+        const doc = frame.contentDocument || frame.contentWindow.document;
+        const eventType = isDown ? 'keydown' : 'keyup';
+        const evt = new KeyboardEvent(eventType, { code: codeName, bubbles: true, cancelable: true });
+        doc.dispatchEvent(evt);
+        frame.contentWindow.dispatchEvent(evt);
+      } catch(e) {}
+    }
+
+    // Simulate Mouse clicks/zoom for Frontier
+    function simMouse(action, isDown) {
+      const frame = document.getElementById('frontierFrame');
+      try {
+        const doc = frame.contentDocument || frame.contentWindow.document;
+        const evtType = isDown ? 'mousedown' : 'mouseup';
+        const buttonVal = action === 'right' ? 2 : 0;
+        const evt = new MouseEvent(evtType, { bubbles: true, cancelable: true, button: buttonVal });
+        doc.dispatchEvent(evt);
+      } catch(e) {}
+    }
+
     function bulletproofLoad(frameId, url) {
       const frame = document.getElementById(frameId);
-      
-      // Step 1: Blank it out and force a layout reflow
       frame.style.display = 'none';
       frame.src = 'about:blank';
 
-      // Step 2: Assign real URL after a micro-delay
       setTimeout(() => {
         frame.src = url;
         frame.style.display = 'block';
 
-        // Step 3: Double-tap reload safety net at 400ms to guarantee canvas graphics context boots properly
         setTimeout(() => {
           try {
             if (frame.contentWindow) {
               frame.contentWindow.location.reload();
             }
           } catch(e) {
-            // Cross-origin fallback safety reset
             frame.src = '';
             setTimeout(() => { frame.src = url; }, 50);
           }
